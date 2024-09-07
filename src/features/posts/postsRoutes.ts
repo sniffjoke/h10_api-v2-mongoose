@@ -1,81 +1,17 @@
-// import express from "express";
-// import {
-//     getPostsController,
-//     createPostController,
-//     updatePostController, getPostByIdController, deletePostController
-// } from "../controllers/postsController";
-// import {
-//     titlePostValidator,
-//     contentPostValidator,
-//     shortDescriptionPostValidator,
-//     blogIdValidator,
-//     idPostValidator
-// } from "../middlewares/express-validators/postsValidators";
-// import {errorMiddleware} from "../middlewares/errors/errorMiddleware";
-// import {authMiddlewareWithBasic} from "../middlewares/auth/authMiddlewareWithBasic";
-// import {authMiddlewareWithBearer} from "../middlewares/auth/authMiddlewareWithBearer"
-// import {createCommentByPostIdWithParamsController, getAllCommentsByPostIdController} from "../controllers/commentsController";
-// import {contentCommentValidator} from "../middlewares/express-validators/commentsValidators";
-//
-//
-// const router = express.Router();
-//
-// router.route('/')
-//     .get(getPostsController)
-//     .post(
-//         authMiddlewareWithBasic,
-//         titlePostValidator,
-//         contentPostValidator,
-//         blogIdValidator,
-//         shortDescriptionPostValidator,
-//         errorMiddleware,
-//         createPostController
-//     );
-//
-// router.route('/:id')
-//     .put(
-//         authMiddlewareWithBasic,
-//         idPostValidator,
-//         titlePostValidator,
-//         contentPostValidator,
-//         blogIdValidator,
-//         shortDescriptionPostValidator,
-//         errorMiddleware,
-//         updatePostController
-//     )
-//     .delete(
-//         authMiddlewareWithBasic,
-//         idPostValidator,
-//         errorMiddleware,
-//         deletePostController
-//     )
-//     .get(
-//         idPostValidator,
-//         errorMiddleware,
-//         getPostByIdController
-//     )
-//
-//
-// router.route('/:id/comments')
-//     .get(
-//         idPostValidator,
-//         errorMiddleware,
-//         getAllCommentsByPostIdController
-//     )
-//     .post(
-//         authMiddlewareWithBearer,
-//         idPostValidator,
-//         contentCommentValidator,
-//         errorMiddleware,
-//         createCommentByPostIdWithParamsController
-//     )
-//
-//
-// export default router
-
 import {Router} from 'express';
 import {postsController} from "./postsController";
 import {commentsController} from "../comments/commentsController";
+import {
+    blogIdInPostValidator,
+    contentPostValidator,
+    idPostValidator,
+    shortDescriptionPostValidator,
+    titlePostValidator
+} from "./validators/postsValidators";
+import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
+import {contentCommentValidator} from "../comments/validators/commentsValidators";
+import {authMiddlewareWithBearer} from "../../middlewares/auth/authMiddlewareWithBearer";
+import {authMiddlewareWithBasic} from "../../middlewares/auth/authMiddlewareWithBasic";
 
 const router = Router();
 
@@ -84,25 +20,49 @@ router.route("/")
         postsController.getPostsWithParams
     )
     .post(
+        authMiddlewareWithBasic,
+        titlePostValidator,
+        contentPostValidator,
+        blogIdInPostValidator,
+        shortDescriptionPostValidator,
+        errorExpressValidatorMiddleware,
         postsController.createPost
     )
 
 router.route("/:id")
     .get(
+        idPostValidator,
+        errorExpressValidatorMiddleware,
         postsController.getPostById
     )
     .put(
+        authMiddlewareWithBasic,
+        idPostValidator,
+        titlePostValidator,
+        contentPostValidator,
+        blogIdInPostValidator,
+        shortDescriptionPostValidator,
+        errorExpressValidatorMiddleware,
         postsController.updatePostById
     )
     .delete(
+        authMiddlewareWithBasic,
+        idPostValidator,
+        errorExpressValidatorMiddleware,
         postsController.deletePostById
     )
 
 router.route('/:id/comments')
     .get(
+        idPostValidator,
+        errorExpressValidatorMiddleware,
         commentsController.getAllCommentsByPostId
     )
     .post(
+        authMiddlewareWithBearer,
+        idPostValidator,
+        contentCommentValidator,
+        errorExpressValidatorMiddleware,
         commentsController.createCommentByPostId
     )
 

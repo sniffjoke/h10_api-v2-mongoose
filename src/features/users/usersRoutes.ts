@@ -1,39 +1,8 @@
-// import express from "express";
-// import {
-//     createUserController,
-//     deleteUserByIdController,
-//     getUsersController
-// } from "../controllers/usersController";
-// import {idUserValidator} from "../middlewares/express-validators/authValidators";
-// import {errorMiddleware} from "../middlewares/errors/errorMiddleware";
-// import {authMiddlewareWithBasic} from "../middlewares/auth/authMiddlewareWithBasic";
-// import {emailUserValidator, loginUserValidator, passwordUserValidator} from "../middlewares/express-validators/usersValidators";
-//
-//
-// const router = express.Router();
-//
-// router.route('/')
-//     .get(getUsersController)
-//     .post(
-//         authMiddlewareWithBasic,
-//         loginUserValidator,
-//         emailUserValidator,
-//         passwordUserValidator,
-//         errorMiddleware,
-//         createUserController
-//     );
-// router.route('/:id')
-//     .delete(
-//         authMiddlewareWithBasic,
-//         idUserValidator,
-//         errorMiddleware,
-//         deleteUserByIdController
-//     )
-//
-// export default router
-
 import express from "express";
 import {usersController} from "./usersController";
+import {authMiddlewareWithBasic} from "../../middlewares/auth/authMiddlewareWithBasic";
+import {emailUserValidator, loginUserValidator, passwordUserValidator} from "./validators/usersValidators";
+import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
 
 const router = express.Router();
 
@@ -42,11 +11,19 @@ router.route('/')
         usersController.getUsersWithParams
     )
     .post(
+        authMiddlewareWithBasic,
+        loginUserValidator,
+        emailUserValidator,
+        passwordUserValidator,
+        errorExpressValidatorMiddleware,
         usersController.createUser
     )
 
 router.route('/:id')
     .delete(
+        authMiddlewareWithBasic,
+        // idUserValidator,
+        errorExpressValidatorMiddleware,
         usersController.deleteUserById
     )
 

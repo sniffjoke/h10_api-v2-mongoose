@@ -60,15 +60,57 @@
 //     }
 // }
 
+import {sign, verify} from "jsonwebtoken";
+import {SETTINGS} from "../settings";
+import {ApiError} from "../exceptions/api.error";
+
 class TokenService {
+
     getToken(bearerToken: string | undefined) {
         const token = bearerToken ? bearerToken.split(' ')[1] as string : undefined
         if (!token) {
-            // throw ApiError.UnauthorizedError()
-            throw new Error('No token specified')
+            throw ApiError.UnauthorizedError()
         }
         return token
     }
+
+    validateAccessToken(token: string) {
+        try {
+            const userData = verify(token, SETTINGS.VARIABLES.JWT_SECRET_ACCESS_TOKEN as string)
+            return userData
+        } catch (e) {
+            return null
+        }
+    }
+
+    validateRefreshToken(token: string) {
+        try {
+            const userData = verify(token, SETTINGS.VARIABLES.JWT_SECRET_REFRESH_TOKEN as string)
+            return userData
+        } catch (e) {
+            return null
+        }
+    }
+
+    createTokens(userId: string) {
+        const accessToken = sign(
+            {_id: userId},
+            SETTINGS.VARIABLES.JWT_SECRET_ACCESS_TOKEN as string,
+            // {expiresIn: 60*60*1000}
+            {expiresIn: '10s'}
+        )
+        const refreshToken = sign(
+            {_id: userId},
+            SETTINGS.VARIABLES.JWT_SECRET_REFRESH_TOKEN as string,
+            // {expiresIn: 60*60*1000}
+            {expiresIn: '20s'}
+        )
+        return {
+            accessToken,
+            refreshToken
+        }
+    }
+
 }
 
 export const tokenService = new TokenService();

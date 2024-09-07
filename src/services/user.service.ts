@@ -57,6 +57,8 @@
 
 import { add } from "date-fns/add"
 import {v4 as uuid} from "uuid"
+import {usersRepository} from "../features/users/usersRepository";
+import {ApiError} from "../exceptions/api.error";
 
 interface EmailConfirmationModel {
     confirmationCode?: string
@@ -81,6 +83,21 @@ class UserService {
         }
         return isConfirm ? emailConfirmationIsConfirm : emailConfirmationNotConfirm
     }
+
+    async validateUser(userLoginOrEmail: string) {
+        let user
+        if (!/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/.test(userLoginOrEmail)) {
+            user = await usersRepository.getUserByLogin(userLoginOrEmail)
+        } else {
+            user = await usersRepository.getUserByEmail(userLoginOrEmail)
+        }
+        if (!user) {
+            // throw ApiError.BadRequest('Пользователь не найден', 'loginOrEmail')
+            throw ApiError.UnauthorizedError()
+        }
+        return user
+    }
+
 }
 
 export const userService = new UserService();

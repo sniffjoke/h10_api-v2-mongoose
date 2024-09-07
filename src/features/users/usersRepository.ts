@@ -77,6 +77,15 @@ class UsersRepository {
         return user
     }
 
+    async getUserByEmail(email: string) {
+        const user = await userModel.findOne({email}) //$or
+        return user
+    }
+
+    async getUserByLogin(login: string) {
+        const user = await userModel.findOne({login})
+        return user
+    }
 
 }
 
