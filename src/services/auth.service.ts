@@ -117,10 +117,10 @@ class AuthService {
     }
 
     async passwordRecovery(email: string) {
-        const emailExists = await userService.isEmailExistOrThrow(email)
-        if (!emailExists) {
-            throw ApiError.BadRequest('Email не существует', email)
-        }
+        // const emailExists = await userService.isEmailExistOrThrow(email)
+        // if (!emailExists) {
+        //     throw ApiError.BadRequest('Email не существует', email)
+        // }
         const emailConfirmation = userService.createEmailConfirmationInfo(false)
         await mailService.sendRecoveryMail(email, `${process.env.API_URL}/api/auth/registration-confirmation/?recoveryCode=${emailConfirmation.confirmationCode}`)
         const updateUserInfo = await authRepository.updateUserWithRecoveryCode(email, `${emailConfirmation.confirmationCode}`)
@@ -134,7 +134,7 @@ class AuthService {
         const {newPassword, recoveryCode} = recoveryPasswordData
         const updateUserInfo = await userService.updatePassword(newPassword, recoveryCode)
         if (!updateUserInfo) {
-            throw ApiError.BadRequest('Невалидный код', recoveryCode)
+            throw ApiError.BadRequest('Невалидный код', 'incorrect')
         }
         return updateUserInfo
     }
