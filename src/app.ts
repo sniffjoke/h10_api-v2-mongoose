@@ -10,6 +10,7 @@ import commentsRoutes from "./features/comments/commentsRoutes";
 import {errorCustomApiMiddleware} from "./middlewares/errors/errorCustomApiMiddleware";
 import authRoutes from "./features/auth/authRoutes";
 import devicesRoutes from "./features/devices/devicesRoutes";
+import testingRoutes from "./features/testing/testingRoutes";
 
 connectToDB()
 
@@ -33,5 +34,5 @@ app.use(SETTINGS.PATH.COMMENTS, commentsRoutes)
 app.use(SETTINGS.PATH.USERS, usersRoutes)
 app.use(SETTINGS.PATH.AUTH, authRoutes)
 app.use(SETTINGS.PATH.SECURITY + '/devices', devicesRoutes)
-// app.use(SETTINGS.PATH.TESTING, testingRoutes)
+app.use(SETTINGS.PATH.TESTING, testingRoutes)
 app.use(errorCustomApiMiddleware)
