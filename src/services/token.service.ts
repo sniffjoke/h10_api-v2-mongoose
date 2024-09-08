@@ -96,7 +96,7 @@ class TokenService {
         }
     }
 
-    createTokens(userId: string) {
+    createTokens(userId: string, deviceId: string) {
         const accessToken = sign(
             {_id: userId},
             SETTINGS.VARIABLES.JWT_SECRET_ACCESS_TOKEN as string,
@@ -104,7 +104,7 @@ class TokenService {
             {expiresIn: '10s'}
         )
         const refreshToken = sign(
-            {_id: userId},
+            {_id: userId, deviceId},
             SETTINGS.VARIABLES.JWT_SECRET_REFRESH_TOKEN as string,
             // {expiresIn: 60*60*1000}
             {expiresIn: '20s'}
@@ -115,9 +115,10 @@ class TokenService {
         }
     }
 
-    async saveTokenInDb(userId: string, token: string, blackList: boolean) {
+    async saveTokenInDb(userId: string, token: string, blackList: boolean, deviceId: string) {
         const tokenData = {
             userId,
+            deviceId,
             refreshToken: token,
             blackList,
         }

@@ -3,6 +3,7 @@ import {commentsController} from "./commentsController";
 import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
 import {contentCommentValidator, idCommentValidator} from "./validators/commentsValidators";
 import {authMiddlewareWithBearer} from "../../middlewares/auth/authMiddlewareWithBearer";
+import {isOwnMiddleware} from "../../middlewares/isOwnMiddleware";
 
 const router = Router();
 
@@ -22,14 +23,14 @@ router.route('/:id')
         idCommentValidator,
         contentCommentValidator,
         errorExpressValidatorMiddleware,
-//         isOwnMiddleware,
+        isOwnMiddleware,
         commentsController.updateCommentById
     )
     .delete(
         authMiddlewareWithBearer,
         idCommentValidator,
         errorExpressValidatorMiddleware,
-//         isOwnMiddleware,
+        isOwnMiddleware,
         commentsController.deleteCommentById
     )
 

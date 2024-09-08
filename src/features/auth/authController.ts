@@ -131,6 +131,10 @@ import {ApiError} from "../../exceptions/api.error";
 import {authService} from "../../services/auth.service";
 import {tokenService} from "../../services/token.service";
 import {CreateUserInfoDto} from "./dto/CreateUserInfo.dto";
+import {IDevice} from "../../types/IDevice";
+import ip from "ip";
+import {deviceModel} from "../../models/devicesModel";
+import {v4 as uuid} from 'uuid';
 
 class AuthController {
 
@@ -141,8 +145,28 @@ class AuthController {
             if (!user) {
                 return next(ApiError.UnauthorizedError())
             }
-            const {accessToken, refreshToken} = await authService.loginUser({loginOrEmail, password})
-            await tokenService.saveTokenInDb(user._id, refreshToken, false)
+            const myIp = ip.address()
+            const userAgent = req.headers['user-agent'] as string;
+            const findSession = await deviceModel.findOne({ip: myIp, title: userAgent})
+            const deviceData: IDevice = {
+                deviceId: findSession ? findSession.deviceId : uuid(),
+                ip: myIp,
+                title: userAgent,
+                lastActiveDate: new Date(Date.now()).toISOString(),
+            }
+            const {accessToken, refreshToken} = await authService.loginUser({loginOrEmail, password}, deviceData.deviceId)
+            if (findSession) {
+                await deviceModel.updateOne({_id: findSession._id}, {
+                    $set: {
+                        lastActiveDate: new Date(Date.now()).toISOString(),
+                    }
+                })
+                await tokenService.saveTokenInDb(user._id, refreshToken, false, findSession.deviceId)
+            } else {
+                const newDevice = new deviceModel(deviceData)
+                await newDevice.save()
+                await tokenService.saveTokenInDb(user._id, refreshToken, false, deviceData.deviceId)
+            }
             res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
             res.status(200).json({accessToken})
         } catch (e) {
@@ -198,15 +222,15 @@ class AuthController {
     }
 
 
-async logout(req: Request, res: Response, next: NextFunction){
-    try {
-        await authService.logoutUser(req.cookies.refreshToken as string)
-        res.clearCookie('refreshToken')
-        res.status(204).send('Logout')
-    } catch (e) {
-        next(e)
+    async logout(req: Request, res: Response, next: NextFunction) {
+        try {
+            await authService.logoutUser(req.cookies.refreshToken as string)
+            res.clearCookie('refreshToken')
+            res.status(204).send('Logout')
+        } catch (e) {
+            next(e)
+        }
     }
-}
 
 }
 

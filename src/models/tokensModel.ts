@@ -8,6 +8,12 @@ const tokenSchema: Schema = new Schema({
             required: true,
             ref: "User",
         },
+        deviceId: {
+            // type: Schema.Types.String,
+            type: String,
+            required: true,
+            // ref: "Device",
+        },
         refreshToken: {
             type: String,
             required: true

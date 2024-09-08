@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "h09_api-v1",
+  "name": "h10_api-v2-mongoose",
   "builds": [
     { "src": "src/index.ts", "use": "@vercel/node" }
   ],

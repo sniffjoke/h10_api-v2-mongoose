@@ -139,7 +139,7 @@ import {authRepository} from "../features/auth/authRepository";
 
 class AuthService {
 
-    async loginUser(userData: ILogin) {
+    async loginUser(userData: ILogin, deviceId: string) {
         const user = await userService.validateUser(userData.loginOrEmail)
         if (!user) {
             throw ApiError.UnauthorizedError()
@@ -148,7 +148,7 @@ class AuthService {
         if (!isPasswordCorrect) {
             throw ApiError.UnauthorizedError()
         }
-        const {accessToken, refreshToken} = tokenService.createTokens(user._id)
+        const {accessToken, refreshToken} = tokenService.createTokens(user._id, deviceId)
         return {
             accessToken,
             refreshToken
@@ -211,8 +211,8 @@ class AuthService {
         if (!updateTokenInfo) {
             throw ApiError.UnauthorizedError()
         }
-        const {refreshToken, accessToken} = tokenService.createTokens(isTokenExists.userId)
-        const addTokenToDb = await tokenService.saveTokenInDb(isTokenExists.userId, refreshToken, false)
+        const {refreshToken, accessToken} = tokenService.createTokens(isTokenExists.userId, tokenValidate.deviceId)
+        const addTokenToDb = await tokenService.saveTokenInDb(isTokenExists.userId, refreshToken, false, isTokenExists.deviceId)
         if (!addTokenToDb) {
             throw ApiError.UnauthorizedError()
         }
