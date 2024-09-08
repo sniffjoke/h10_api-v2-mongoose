@@ -136,6 +136,8 @@ import {tokenService} from "./token.service";
 import {usersRepository} from "../features/users/usersRepository";
 import mailService from "./mail.service";
 import {authRepository} from "../features/auth/authRepository";
+import {tokenModel} from "../models/tokensModel";
+import {deviceModel} from "../models/devicesModel";
 
 class AuthService {
 
@@ -232,15 +234,15 @@ class AuthService {
         if (!isTokenExists || isTokenExists.blackList) {
             throw ApiError.UnauthorizedError()
         }
-        const updatedToken = await tokenService.updateTokensStatus(token)
-        // const updatedToken = await tokenCollection.updateMany({deviceId: tokenValidate.deviceId}, {$set: {blackList: true}})
+        // const updatedToken = await tokenService.updateTokensStatus(token)
+        const updatedToken = await tokenModel.updateMany({deviceId: tokenValidate.deviceId}, {$set: {blackList: true}})
         if (!updatedToken) {
             throw ApiError.UnauthorizedError()
         }
-        // const updateDevices = await deviceCollection.deleteOne({deviceId: tokenValidate.deviceId})
-        // if (!updateDevices) {
-        //     throw ApiError.UnauthorizedError()
-        // }
+        const updateDevices = await deviceModel.deleteOne({deviceId: tokenValidate.deviceId})
+        if (!updateDevices) {
+            throw ApiError.UnauthorizedError()
+        }
         return updatedToken
     }
 
