@@ -198,6 +198,52 @@ class AuthService {
         return updateEmailStatus
     }
 
+    async refreshToken(token: string) {
+        const tokenValidate: any = tokenService.validateRefreshToken(token)
+        if (!tokenValidate) {
+            throw ApiError.UnauthorizedError()
+        }
+        const isTokenExists = await tokenService.findTokenInDb(token)
+        if (!isTokenExists || isTokenExists.blackList) {
+            throw ApiError.UnauthorizedError()
+        }
+        const updateTokenInfo = await tokenService.updateTokensStatus(token)
+        if (!updateTokenInfo) {
+            throw ApiError.UnauthorizedError()
+        }
+        const {refreshToken, accessToken} = tokenService.createTokens(isTokenExists.userId)
+        const addTokenToDb = await tokenService.saveTokenInDb(isTokenExists.userId, refreshToken, false)
+        if (!addTokenToDb) {
+            throw ApiError.UnauthorizedError()
+        }
+        return {
+            refreshToken,
+            accessToken
+        }
+
+    }
+
+    async logoutUser(token: string) {
+        const tokenValidate: any = tokenService.validateRefreshToken(token)
+        if (!tokenValidate) {
+            throw ApiError.UnauthorizedError()
+        }
+        const isTokenExists = await tokenService.findTokenInDb(token)
+        if (!isTokenExists || isTokenExists.blackList) {
+            throw ApiError.UnauthorizedError()
+        }
+        const updatedToken = await tokenService.updateTokensStatus(token)
+        // const updatedToken = await tokenCollection.updateMany({deviceId: tokenValidate.deviceId}, {$set: {blackList: true}})
+        if (!updatedToken) {
+            throw ApiError.UnauthorizedError()
+        }
+        // const updateDevices = await deviceCollection.deleteOne({deviceId: tokenValidate.deviceId})
+        // if (!updateDevices) {
+        //     throw ApiError.UnauthorizedError()
+        // }
+        return updatedToken
+    }
+
 }
 
 export const authService = new AuthService();

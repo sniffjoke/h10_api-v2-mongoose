@@ -74,17 +74,19 @@ import {authController} from "./authController";
 import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
 import {emailAuthValidator, loginAuthValidator, passwordAuthValidator} from "./validators/authValidators";
 import {authMiddlewareWithBearer} from "../../middlewares/auth/authMiddlewareWithBearer";
+import {rateLimitMiddleware} from "../../middlewares/rateLimitMiddleware";
 
 const router = Router();
 
 router.route('/login')
     .post(
+        rateLimitMiddleware,
         authController.login
     )
 
 router.route('/registration')
     .post(
-//         rateLimitMiddleware,
+        rateLimitMiddleware,
         loginAuthValidator,
         emailAuthValidator,
         passwordAuthValidator,
@@ -101,7 +103,7 @@ router.route('/me')
 
 router.route('/registration-email-resending')
     .post(
-//         rateLimitMiddleware,
+        rateLimitMiddleware,
         emailAuthValidator,
         errorExpressValidatorMiddleware,
         authController.resendEmail
@@ -109,8 +111,18 @@ router.route('/registration-email-resending')
 
 router.route('/registration-confirmation')
     .post(
-//         rateLimitMiddleware,
+        rateLimitMiddleware,
         authController.activateEmailUser
     );
+
+router.route('/refresh-token')
+    .post(
+        authController.refreshToken
+    )
+
+router.route('/logout')
+    .post(
+        authController.logout
+    )
 
 export default router

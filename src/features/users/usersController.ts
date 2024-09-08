@@ -5,7 +5,6 @@ import {usersQueryRepository} from "./usersQueryRepository";
 import {CreateItemsWithQueryDto} from "../blogs/dto/CreateDataWithQuery.dto";
 import {UserInstance} from "../../interfaces/users.interface";
 import {userService} from "../../services/user.service";
-import {cryptoService} from "../../services/crypto.service";
 
 class UsersController {
 

@@ -3,4 +3,5 @@ export interface TokenInstance {
     userId: string;
     refreshToken: string;
     blackList: boolean
+    createdAt: string;
 }
