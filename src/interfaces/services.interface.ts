@@ -3,3 +3,8 @@ export interface EmailConfirmationModel {
     expirationDate?: string
     isConfirmed: boolean
 }
+
+export interface RecoveryPasswordModel {
+    newPassword: string
+    recoveryCode: string
+}

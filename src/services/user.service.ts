@@ -63,6 +63,7 @@ import {cryptoService} from "./crypto.service";
 import {IUser} from "../types/IUser";
 import mailService from "./mail.service";
 import {SETTINGS} from "../settings";
+import {userModel} from "../models/usersModel";
 
 interface EmailConfirmationModel {
     confirmationCode?: string
@@ -72,7 +73,10 @@ interface EmailConfirmationModel {
 
 class UserService {
 
+    public users = userModel
+
     async createUser(userData: IUser, isConfirm: boolean) {
+        await this.isExistOrThrow(userData.login, userData.email)
         const emailConfirmation: EmailConfirmationModel = userService.createEmailConfirmationInfo(isConfirm)
         const hashPassword = await cryptoService.hashPassword(userData.password)
         if (!isConfirm) {
@@ -80,6 +84,18 @@ class UserService {
         }
         const user = await usersRepository.createUser(userData, hashPassword, emailConfirmation)
         return user
+    }
+
+    async isExistOrThrow(login: string, email: string) {
+        const emailExists = await usersRepository.getUserByEmail(email)
+        const loginExists = await usersRepository.getUserByLogin(login)
+        if (emailExists) {
+            throw ApiError.BadRequest(`Юзер с email ${email} уже существует`, 'email')
+        }
+        if (loginExists) {
+            throw ApiError.BadRequest(`Юзер с login ${login} уже существует`, 'login')
+        }
+        return null
     }
 
     public createEmailConfirmationInfo(isConfirm: boolean) {
@@ -110,6 +126,28 @@ class UserService {
             throw ApiError.UnauthorizedError()
         }
         return user
+    }
+
+    async isEmailExistOrThrow(email: string) {
+        const emailExists = await usersRepository.getUserByEmail(email)
+        if (!emailExists) {
+            throw ApiError.BadRequest(`Юзер с email ${email} не существует`, 'email')
+        }
+        return emailExists
+    }
+
+    async updatePassword(password: string, recoveryCode: string) {
+        const user = await this.users.findOne({'emailConfirmation.confirmationCode': recoveryCode})
+        if (!user) {
+            throw ApiError.BadRequest('Юзер не найден', recoveryCode)
+        }
+        const emailExists = await usersRepository.getUserByEmail(user.email)
+        if (!emailExists) {
+            throw ApiError.BadRequest('Данный email не найден', 'email')
+        }
+        const hashPassword = await cryptoService.hashPassword(password)
+        const updateUserInfo = await usersRepository.updateUserPassword(user.email, hashPassword)
+        return updateUserInfo
     }
 
 }

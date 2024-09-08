@@ -30,3 +30,8 @@ export const emailAuthValidator = body('email')
     .isString().withMessage('Должно быть строковым значением')
     .trim()
     .isEmail().withMessage('Введите валидный емайл')
+
+export const newPasswordAuthValidator = body('newPassword')
+    .isString().withMessage('Должно быть строковым значением')
+    .trim()
+    .isLength({min: 6, max: 20}).withMessage('Количество знаков 6-20')

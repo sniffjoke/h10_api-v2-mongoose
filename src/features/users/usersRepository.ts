@@ -61,6 +61,12 @@ class UsersRepository {
         return userDto
     }
 
+    async updateUserPassword(email: string, newPassword: string) {
+        const findedUser = await this.users.findOne({email})
+        const updateUserInfo = await this.users.updateOne({email: findedUser?.email}, {$set: {password: newPassword}})
+        return updateUserInfo
+    }
+
     async findUserById(id: string): Promise<UserInstance | null> {
         const user = await this.users.findById(id)
         return user

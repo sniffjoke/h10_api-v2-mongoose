@@ -72,7 +72,12 @@
 import {Router} from 'express';
 import {authController} from "./authController";
 import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
-import {emailAuthValidator, loginAuthValidator, passwordAuthValidator} from "./validators/authValidators";
+import {
+    emailAuthValidator,
+    loginAuthValidator,
+    newPasswordAuthValidator,
+    passwordAuthValidator
+} from "./validators/authValidators";
 import {authMiddlewareWithBearer} from "../../middlewares/auth/authMiddlewareWithBearer";
 import {rateLimitMiddleware} from "../../middlewares/rateLimitMiddleware";
 
@@ -123,6 +128,22 @@ router.route('/refresh-token')
 router.route('/logout')
     .post(
         authController.logout
+    )
+
+router.route('/password-recovery')
+    .post(
+        rateLimitMiddleware,
+        emailAuthValidator,
+        errorExpressValidatorMiddleware,
+        authController.passwordRecovery
+    )
+
+router.route('/new-password')
+    .post(
+        rateLimitMiddleware,
+        newPasswordAuthValidator,
+        errorExpressValidatorMiddleware,
+        authController.newPasswordApprove
     )
 
 export default router

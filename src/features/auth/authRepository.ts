@@ -49,6 +49,11 @@ class AuthRepository {
         return updateEmail
     }
 
+    async updateUserWithRecoveryCode(email: string, recoveryCode: string) {
+        const updateUserInfo = await this.users.updateOne({email}, {$set: {'emailConfirmation.confirmationCode': recoveryCode}});
+        return updateUserInfo
+    }
+
 }
 
 export const authRepository = new AuthRepository();
