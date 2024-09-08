@@ -139,7 +139,7 @@ class UserService {
     async updatePassword(password: string, recoveryCode: string) {
         const user = await this.users.findOne({'emailConfirmation.confirmationCode': recoveryCode})
         if (!user) {
-            throw ApiError.BadRequest('Юзер не найден', 'incorrect')
+            throw ApiError.BadRequest('Юзер не найден', 'recoveryCode')
         }
         const emailExists = await usersRepository.getUserByEmail(user.email)
         if (!emailExists) {
