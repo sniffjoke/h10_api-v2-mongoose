@@ -129,11 +129,10 @@ import {Request, Response, NextFunction} from "express";
 import {userService} from "../../services/user.service";
 import {ApiError} from "../../exceptions/api.error";
 import {authService} from "../../services/auth.service";
-import {tokenModel} from "../../models/tokensModel";
+import {tokenService} from "../../services/token.service";
+import {CreateUserInfoDto} from "./dto/CreateUserInfo.dto";
 
 class AuthController {
-
-    public tokens = tokenModel
 
     async login(req: Request, res: Response, next: NextFunction) {
         try {
@@ -143,15 +142,46 @@ class AuthController {
                 return next(ApiError.UnauthorizedError())
             }
             const {accessToken, refreshToken} = await authService.loginUser({loginOrEmail, password})
-            const tokenData = {
-                userId: user._id,
-                refreshToken,
-                blackList: false,
-            }
-            const newToken = new this.tokens(tokenData)
-            await newToken.save()
+            await tokenService.saveTokenInDb(user._id, refreshToken, false)
             res.cookie('refreshToken', refreshToken, {httpOnly: true, secure: true})
             res.status(200).json({accessToken})
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async register(req: Request, res: Response, next: NextFunction) {
+        try {
+            await userService.createUser(req.body, false)
+            res.status(204).send('Письмо с активацией отправлено')
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async getMe(req: Request, res: Response, next: NextFunction) {
+        try {
+            const user = await authService.getMe(tokenService.getToken(req.headers.authorization))
+            const userInfo = new CreateUserInfoDto(user)
+            res.status(200).json(userInfo)
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    async resendEmail(req: Request, res: Response, next: NextFunction) {
+        try {
+            await authService.resendEmail(req.body.email)
+            res.status(204).send('Ссылка повторна отправлена')
+        } catch (e) {
+            next(e)
+        }
+    }
+
+    activateEmailUser = async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            await authService.activateEmail(req.body.code)
+            res.status(204).send('Email подтвержден')
         } catch (e) {
             next(e)
         }

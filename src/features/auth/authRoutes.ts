@@ -69,8 +69,11 @@
 //
 // export default router
 
-import { Router } from 'express';
+import {Router} from 'express';
 import {authController} from "./authController";
+import {errorExpressValidatorMiddleware} from "../../middlewares/errors/errorExpressValidatorMiddleware";
+import {emailAuthValidator, loginAuthValidator, passwordAuthValidator} from "./validators/authValidators";
+import {authMiddlewareWithBearer} from "../../middlewares/auth/authMiddlewareWithBearer";
 
 const router = Router();
 
@@ -78,5 +81,36 @@ router.route('/login')
     .post(
         authController.login
     )
+
+router.route('/registration')
+    .post(
+//         rateLimitMiddleware,
+        loginAuthValidator,
+        emailAuthValidator,
+        passwordAuthValidator,
+        errorExpressValidatorMiddleware,
+        authController.register
+    );
+
+router.route('/me')
+    .get(
+        authMiddlewareWithBearer,
+        errorExpressValidatorMiddleware,
+        authController.getMe
+    );
+
+router.route('/registration-email-resending')
+    .post(
+//         rateLimitMiddleware,
+        emailAuthValidator,
+        errorExpressValidatorMiddleware,
+        authController.resendEmail
+    );
+
+router.route('/registration-confirmation')
+    .post(
+//         rateLimitMiddleware,
+        authController.activateEmailUser
+    );
 
 export default router

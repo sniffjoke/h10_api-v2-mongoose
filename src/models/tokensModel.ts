@@ -5,6 +5,7 @@ import {TokenInstance} from "../interfaces/tokens.interface";
 const tokenSchema: Schema = new Schema({
         userId: {
             type: Schema.Types.ObjectId,
+            required: true,
             ref: "User",
         },
         refreshToken: {

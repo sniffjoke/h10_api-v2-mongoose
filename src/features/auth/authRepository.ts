@@ -23,3 +23,32 @@
 //     }
 //
 // }
+
+import {userModel} from "../../models/usersModel";
+import {EmailConfirmationModel} from "../../interfaces/services.interface";
+
+class AuthRepository {
+
+    public users = userModel
+
+    async updateUserWithResendActivateEmail(email: string, emailConfirmation: EmailConfirmationModel) {
+        const updateUserInfo = await this.users.updateOne({email}, {$set: {emailConfirmation}});
+        return updateUserInfo
+    }
+
+    async checkActivateEmailByCode(confirmationCode: string) {
+        const checkActivate = await this.users.findOne({'emailConfirmation.confirmationCode': confirmationCode})
+        return checkActivate;
+    }
+
+    async toActivateEmail(confirmationCode: string) {
+        const updateEmail = await this.users.findOneAndUpdate(
+            {'emailConfirmation.confirmationCode': confirmationCode},
+            {$set: {emailConfirmation: {isConfirmed: true}}}
+        )
+        return updateEmail
+    }
+
+}
+
+export const authRepository = new AuthRepository();

@@ -60,11 +60,14 @@
 //     }
 // }
 
-import {sign, verify} from "jsonwebtoken";
+import {decode, sign, verify} from "jsonwebtoken";
 import {SETTINGS} from "../settings";
 import {ApiError} from "../exceptions/api.error";
+import {tokenModel} from "../models/tokensModel";
 
 class TokenService {
+
+    public tokens = tokenModel
 
     getToken(bearerToken: string | undefined) {
         const token = bearerToken ? bearerToken.split(' ')[1] as string : undefined
@@ -109,6 +112,24 @@ class TokenService {
             accessToken,
             refreshToken
         }
+    }
+
+    async saveTokenInDb(userId: string, token: string, blackList: boolean) {
+        const tokenData = {
+            userId,
+            refreshToken: token,
+            blackList,
+        }
+        const newToken = new this.tokens(tokenData)
+        return await newToken.save()
+    }
+
+    decodeToken(token: string) {
+        const decodedToken = decode(token)
+        if (!token) {
+            throw ApiError.UnauthorizedError()
+        }
+        return decodedToken
     }
 
 }

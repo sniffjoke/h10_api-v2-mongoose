@@ -4,12 +4,14 @@ import {findUsersHelper} from "../../helpers/usersHelper";
 import {usersQueryRepository} from "./usersQueryRepository";
 import {CreateItemsWithQueryDto} from "../blogs/dto/CreateDataWithQuery.dto";
 import {UserInstance} from "../../interfaces/users.interface";
+import {userService} from "../../services/user.service";
+import {cryptoService} from "../../services/crypto.service";
 
 class UsersController {
 
     async createUser(req: Request<any, any, any, any>, res: Response, next: NextFunction) {
         try {
-            const newUser = await usersRepository.createUser(req.body)
+            const newUser = await userService.createUser(req.body, true)
             res.status(201).json(newUser)
         } catch (e) {
             next(e)

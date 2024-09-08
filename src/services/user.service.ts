@@ -59,6 +59,10 @@ import { add } from "date-fns/add"
 import {v4 as uuid} from "uuid"
 import {usersRepository} from "../features/users/usersRepository";
 import {ApiError} from "../exceptions/api.error";
+import {cryptoService} from "./crypto.service";
+import {IUser} from "../types/IUser";
+import mailService from "./mail.service";
+import {SETTINGS} from "../settings";
 
 interface EmailConfirmationModel {
     confirmationCode?: string
@@ -67,6 +71,16 @@ interface EmailConfirmationModel {
 }
 
 class UserService {
+
+    async createUser(userData: IUser, isConfirm: boolean) {
+        const emailConfirmation: EmailConfirmationModel = userService.createEmailConfirmationInfo(isConfirm)
+        const hashPassword = await cryptoService.hashPassword(userData.password)
+        if (!isConfirm) {
+            await mailService.sendActivationMail(userData.email, `${SETTINGS.PATH.API_URL}/api/auth/registration-confirmation/?code=${emailConfirmation.confirmationCode}`)
+        }
+        const user = await usersRepository.createUser(userData, hashPassword, emailConfirmation)
+        return user
+    }
 
     public createEmailConfirmationInfo(isConfirm: boolean) {
         const emailConfirmationNotConfirm: EmailConfirmationModel = {

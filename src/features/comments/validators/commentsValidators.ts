@@ -1,5 +1,4 @@
 import {body, param} from "express-validator";
-import {ObjectId} from "mongodb";
 import {commentModel} from "../../../models/commentsModel";
 
 

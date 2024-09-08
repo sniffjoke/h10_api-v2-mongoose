@@ -46,22 +46,16 @@
 import {IUser} from "../../types/IUser";
 import {CreateUserDto} from "./dto/CreateUser.dto";
 import {userModel} from "../../models/usersModel";
-import {userService} from "../../services/user.service";
 import {UserInstance} from "../../interfaces/users.interface";
+import {EmailConfirmationModel} from "../../interfaces/services.interface";
 
-interface EmailConfirmationModel {
-    confirmationCode?: string
-    expirationDate?: string
-    isConfirmed: boolean
-}
 
 class UsersRepository {
 
     public users = userModel
 
-    async createUser(userData: IUser): Promise<CreateUserDto> {
-        const emailConfirmation: EmailConfirmationModel = userService.createEmailConfirmationInfo(true)
-        const user = new this.users({...userData, emailConfirmation})
+    async createUser(userData: IUser, hashPassword: string, emailConfirmation: EmailConfirmationModel): Promise<CreateUserDto> {
+        const user = new this.users({...userData, password: hashPassword, emailConfirmation})
         await user.save()
         const userDto = new CreateUserDto(user)
         return userDto
